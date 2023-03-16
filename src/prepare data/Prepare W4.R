@@ -89,3 +89,33 @@ wave.4 <- wave.4 %>%
   ungroup()
 
 #-------------------------------------------------------------------------
+
+wave.4 <- wave.4 %>%
+  mutate(edu = case_when(
+    h4ed2 %in% c("1", "2") ~ "Some HS or Less",
+    h4ed2 == "3" ~ "HS Diploma/GED",
+    h4ed2 %in% c("4", "5", "6") ~ "Some College or Tech/Assoc Degree",
+    h4ed2 %in% c("7", "8", "9", "10", "11", "12", "13") ~ "College Degree or More",
+    TRUE ~ NA_character_
+  ))
+
+# convert to factor with specified labels
+wave.4$edu <- factor(wave.4$edu, levels = c("Some HS or Less", "HS Diploma/GED",
+                                    "Some College or Tech/Assoc Degree",
+                                    "College Degree or More"))
+
+
+wave.4 <- wave.4 %>% 
+  mutate(insurance = case_when(
+    h4hs1 %in% c(1, 11, 96, 98) ~ "Uninsured or DK",
+    h4hs1 %in% c(2, 3, 4, 5, 6, 7, 8) ~ "Private or Employer-Based",
+    h4hs1 %in% c(9) ~ "Medicaid/Medicare",
+    h4hs1 %in% c(10, 7) ~ "Other Government"
+  ))
+
+wave.4$insurance <- factor(wave.4$insurance,
+                           levels = c("Private or Employer-Based", 
+                                      "Medicaid/Medicare", 
+                                      "Other Government",
+                                      "Uninsured or DK"))
+

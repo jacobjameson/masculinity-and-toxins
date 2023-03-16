@@ -57,21 +57,26 @@ wave.1 <- wave.1 %>%
                                         'sci.gpa')), 
                                na.rm = TRUE))
 
-wave.1 <- wave.1 %>%
+wave.1 <- wave.1 %>% 
   mutate(race = case_when(
-    h1gi6a == 1 & (h1gi6b != 1 & h1gi6c != 1 & h1gi6d != 1 & h1gi6e != 1) ~ 1,
-    h1gi6b == 1 & (h1gi6a != 1 & h1gi6c != 1 & h1gi6d != 1 & h1gi6e != 1) ~ 2,
-    h1gi6c == 1 & (h1gi6a != 1 & h1gi6b != 1 & h1gi6d != 1 & h1gi6e != 1) ~ 3,
-    h1gi6d == 1 & (h1gi6a != 1 & h1gi6b != 1 & h1gi6c != 1 & h1gi6e != 1) ~ 4,
-    h1gi6e == 1 ~ 5, TRUE ~ 5))
+    h1gi4 == 1 ~ "Hispanic",
+    h1gi6a == 1 & (h1gi6b != 1 & h1gi6c != 1 & h1gi6d != 1 & h1gi6e != 1) ~ "Non Hispanic White",
+    h1gi6b == 1 & (h1gi6a != 1 & h1gi6c != 1 & h1gi6d != 1 & h1gi6e != 1) ~ "Non Hispanic Black/Af-Am",
+    h1gi6c == 1 & (h1gi6a != 1 & h1gi6b != 1 & h1gi6d != 1 & h1gi6e != 1) ~ "Multiple Races or Other",
+    h1gi6d == 1 & (h1gi6a != 1 & h1gi6b != 1 & h1gi6c != 1 & h1gi6e != 1)  ~ "Non Hispanic Asian/Pacific Islander",
+    h1gi6e == 1 ~ "Multiple Races or Other",
+    TRUE ~ "Multiple Races or Other"
+  ))
 
-wave.1$race <- factor(wave.1$race, levels = c(1,2,3,4,5),
-                      labels = c("White only", "Black or AA only",
-                                 "American Indian or Native American only",
-                                 "Asian or Pacific Islander ony",
+wave.1$race <- factor(wave.1$race,
+                      levels = c("Non Hispanic White", "Non Hispanic Black/Af-Am",
+                                 "Non Hispanic Asian/Pacific Islander",
+                                 "Hispanic",
+                                 "Multiple Races or Other"),
+                      labels = c("Non Hispanic White", "Non Hispanic Black/Af-Am",
+                                 "Non Hispanic Asian/Pacific Islander",
+                                 "Hispanic",
                                  "Multiple Races or Other"))
-
-
 
 # Clean gender expression variables for regression model ----------------------
 wave.1 <- wave.1 %>%

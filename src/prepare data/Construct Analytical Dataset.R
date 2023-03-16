@@ -146,7 +146,7 @@ vars.keep <- c('w1.cigarettes', 'w1.marijuana', 'w1.recreational',
                'w1_male', 'self_self', 'school_self',
                'delta_w1_w4_GE', 'w1.GE_male', 'w4.GE_male',
                'school_avg_GE', 'w1.GE_male_std', 'w4.GE_male_std',
-               'sespc_al', 'nhood1_d', 'pseudo.gpa', 'race',
+               'sespc_al', 'nhood1_d', 'pseudo.gpa', 'race', 'edu', 'insurance',
                'w4_male', 'above_school_avg', 'w1.GE_male_std_school')
 
 # Select only the variables to keep and filter out any missing weight values

@@ -8,7 +8,8 @@ rm(list = ls())
 
 libs <- c("tidyverse", "haven", 'scales', 'survey', 'gridExtra',
           'gtsummary', 'labelled', 'broom', 'ggpubr', 'sandwich',
-          'lmtest', 'marginaleffects', 'webshot2')
+          'lmtest', 'marginaleffects', 'webshot2', 'gt',
+          'kableExtra')
 
 installed_libs <- libs %in% rownames (installed.packages ())
 if (any (installed_libs == F)) {
@@ -26,7 +27,7 @@ source('src/prepare data/Construct Analytical Dataset.R')
 
 # Unweighted -------------------------------------------------------------
 
-t1.vars <- c("race", 'pseudo.gpa', 'sespc_al', 'nhood1_d', 
+t1.vars <- c("race", 'pseudo.gpa', 'sespc_al', 'nhood1_d', 'edu', 'insurance',
              "w1.cigarettes", "w1.marijuana", 
              "w1.drunk", "w1.recreational", "w4.cigarettes", "w4.marijuana", 
              "w4.drunk", "w4.recreational", "w4.prescription")
@@ -42,9 +43,9 @@ sum <- final.df %>% filter(in_sample == 1) %>%
                     all_categorical() ~ "chisq.test")) %>%
   add_overall() %>% modify_header(label ~ "**Variable**") %>%
   modify_caption("**Patient Characteristics (unweighted)**") %>%
-  bold_labels()
+  bold_labels() %>% as_gt()
 
-gt::gtsave(as_gt(sum), file = "tables:figures/unweighted.table1.pdf")
+print(sum)
 
 # Weighted -------------------------------------------------------------
 final.weighted <- svydesign(id=~psuscid, strata=~region,
@@ -64,9 +65,9 @@ sum <- subset(final.weighted, in_sample == 1) %>%
   add_overall() %>%
   modify_header(label ~ "**Variable**") %>%
   modify_caption("**Table 1. Patient Characteristics (weighted)**") %>%
-  bold_labels()
+  bold_labels() %>% as_gt()
 
-gt::gtsave(as_gt(sum), file = "tables:figures/weighted.table1.pdf")
+print(sum)
 
 # TABLE 2 --------------------------------------------------------------------------
 
