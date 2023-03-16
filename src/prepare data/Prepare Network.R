@@ -154,11 +154,11 @@ for (school in unique(friend.df$sschlcde)){
 
 rm(list=setdiff(ls(), c('rec', 'friend', 'bff', 'friend.df')))
 #-------------------------------------------------------------------------
-friend.df <- merge(friend, friend.df, by='aid', all=T)
-friend.df <- merge(rec, friend.df, by='aid', all=T)
-friend.df <- merge(bff, friend.df, by='aid', all=T)
+friend.df.t <- merge(friend, friend.df, by='aid', all.y=T)
+friend.df.t <- merge(rec, friend.df.t, by='aid', all.y=T)
+friend.df.t <- merge(bff, friend.df.t, by='aid', all.y=T)
 
-final <- friend.df[,c('aid', 'sqid', 'num_bff_noms', 'nominations',
+final <- friend.df.t[,c('aid', 'sqid', 'num_bff_noms', 'nominations',
                       'mbff_reciprocity', 'fbff_reciprocity')]
 
 final <- final %>%
@@ -168,13 +168,14 @@ final <- final %>%
          fbff_reciprocity = ifelse(is.na(fbff_reciprocity) == T, 0, fbff_reciprocity))
 
 
-friend.long <- friend.df[,c('aid', 'sschlcde', 'mf1aid', 'mf2aid', 'mf3aid', 'mf4aid',
+friend.long <- friend.df.t[,c('aid', 'sschlcde', 'mf1aid', 'mf2aid', 'mf3aid', 'mf4aid',
                           'mf5aid', 'ff1aid','ff2aid', 'ff3aid', 'ff4aid',
                           'ff5aid')]  %>% 
   pivot_longer(cols = c(mf1aid, mf2aid, mf3aid, mf4aid, mf5aid, 
                         ff1aid, ff2aid, ff3aid, ff4aid, ff5aid), 
                names_to = "friend_type", values_to = "friend_aid") %>% 
   filter(!is.na(friend_aid))
+
 
 
 #-------------------------------------------------------------------------
@@ -210,14 +211,16 @@ for (school in unique(friend.long$sschlcde)){
   netx <- rbind(netx, data.frame(list('aid' = aids, 'katz_centrality_R' = k)))
 }
 
-friend.df <- merge(netx, final, by='aid', all=T)
+friend.df.t <- merge(netx, final, by='aid', all.y=T)
 
-friend.df <- friend.df %>%
+friend.df.t <- friend.df.t %>%
   mutate(katz_centrality_R = 
            ifelse(is.na(katz_centrality_R) == T, 1, katz_centrality_R))
 
+
+friend.df.t <- friend.df.t[!duplicated(friend.df.t$aid), ]
 #-------------------------------------------------------------------------
 # Save data
-rm(list=setdiff(ls(), 'friend.df')) 
-write_csv(friend.df, 'data/network.csv')
+rm(list=setdiff(ls(), 'friend.df.t')) 
+write_csv(friend.df.t, 'data/network.csv')
 #-------------------------------------------------------------------------

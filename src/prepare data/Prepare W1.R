@@ -123,7 +123,6 @@ wave.1 <- wave.1 %>%
   mutate(w1.GE_male_std = scale(w1.GE_male) %>% as.vector) %>% 
   ungroup()
 
-
 wave.1 <- wave.1 %>%
   group_by(w1_male, sschlcde) %>%
   mutate(w1.GE_male_std_school = scale(w1.GE_male) %>% as.vector) %>% 

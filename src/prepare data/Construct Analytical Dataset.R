@@ -100,10 +100,10 @@ final.df <- final.df %>%
   mutate(
     w1.cigarettes = case_when(h1to5 > 0 & h1to5 < 96 ~ 1,
                               h1to5 == 0 | h1to5 == 97 ~ 0,
-                              TRUE ~ NaN),
+                              TRUE ~ NA),
     w1.marijuana = case_when(h1to30 > 0 & h1to30 < 96 ~ 1,
                              h1to30 == 0 | h1to30 == 98 ~ 0,
-                             TRUE ~ NaN),
+                             TRUE ~ NA),
     w1.recreational = case_when(h1to34 > 0 & h1to34 < 96 ~ 1,
                                 h1to38 > 0 & h1to38 < 996 ~ 1,
                                 h1to41 > 0 & h1to41 < 996 ~ 1,
@@ -111,10 +111,10 @@ final.df <- final.df %>%
                                 (h1to34 == 0 & h1to38 == 997 &
                                    h1to41 == 997 &
                                    (h1to43 == 0 | h1to43 == 7)) ~ 0,
-                                TRUE ~ NaN),
+                                TRUE ~ NA),
     w1.drunk = case_when(h1to18 < 7 & h1to18 >= 1 ~ 1,
                          h1to18 == 7 | h1to18 == 97 ~ 0,
-                         TRUE ~ NaN),
+                         TRUE ~ NA),
     w4.recreational = case_when(h4to65a == 1 ~ 1,
                                 h4to65c == 1 ~ 1,
                                 h4to65d == 1 ~ 1,
@@ -126,16 +126,16 @@ final.df <- final.df %>%
                                 TRUE ~ 0),
     w4.marijuana = case_when(h4to65b == 1 ~ 1,
                              h4to65b == 0 ~ 0,
-                             TRUE ~ NaN),
+                             TRUE ~ NA),
     w4.drunk = case_when(h4to38 > 0 & h4to38 < 96 ~ 1,
                          h4to38 == 0 | h4to38 == 97 ~ 0,
-                         TRUE ~ NaN),
+                         TRUE ~ NA),
     w4.cigarettes = case_when(h4to3 == 1 ~ 1,
                               h4to3 == 0 | h4to3 == 7 ~ 0,
-                              TRUE ~ NaN),
+                              TRUE ~ NA),
     w4.prescription = case_when(h4to63 == 1 ~ 1,
                                 h4to63 == 0 ~ 0,
-                                TRUE ~ NaN)
+                                TRUE ~ NA)
   )
 
 # Define variables to keep -----------------------------------------------
