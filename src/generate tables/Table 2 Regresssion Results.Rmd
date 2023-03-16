@@ -1,0 +1,534 @@
+---
+title: "Table 2 Regressions"
+author: "Jacob Jameson"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r, message=F, include=FALSE}
+# Load packages necessary for preparing final data
+library(tidyverse)
+library(haven)
+library(labelled)
+library(scales)
+library(survey)
+library(stargazer)
+
+
+# Create and prepare wave 1 and wave 4 data
+data_path <- '~/Desktop/Add Health Substance Use Project/'
+
+final.df <- read.csv(paste0(data_path, 'Data/Final.csv'))
+network <- read.csv(paste0(data_path, 'Data/network.csv'))
+
+final.df$race <- as.character(final.df$race)
+final.df$race <- relevel(as.factor(final.df$race),"White only")
+
+network <- merge(network, final.df, by='aid', all=T)
+
+sum(final.df$in_sample)
+sum(temp$in_sample)
+
+network %>%
+  filter(in_sample == 1)
+```
+
+
+```{r,results='hide'}
+final.weighted <- svydesign(id=~psuscid, strata=~region,
+                            weights=~gswgt4_2, data=final.df, nest=TRUE)
+
+s.0 <- svyglm(w4.cigarettes ~ w1.GE_male_std + race + pseudo.gpa +
+                  sespc_al + nhood1_d, 
+               design=subset(final.weighted, in_sample == 1), family = 'quasibinomial')
+
+s.1 <- svyglm(w4.cigarettes ~ w1.GE_male_std + race + pseudo.gpa +
+                  sespc_al + nhood1_d + factor(w1.cigarettes), 
+               design=subset(final.weighted, in_sample == 1), family = 'quasibinomial')
+
+s.2 <- svyglm(w4.cigarettes ~ w4.GE_male_std + race + pseudo.gpa +
+                  sespc_al + nhood1_d + factor(w1.cigarettes), 
+               design=subset(final.weighted, in_sample == 1), family = 'quasibinomial')
+
+s.3 <- svyglm(w4.cigarettes ~ delta_w1_w4_GE + race + pseudo.gpa +
+                  sespc_al + nhood1_d + factor(w1.cigarettes), 
+               design=subset(final.weighted, in_sample == 1), family = 'quasibinomial')
+
+s.4 <- svyglm(w4.cigarettes ~ w1.GE_male_std + w4.GE_male_std + race + pseudo.gpa +
+                  sespc_al + nhood1_d + factor(w1.cigarettes), 
+               design=subset(final.weighted, in_sample == 1), family = 'quasibinomial')
+
+s.5 <- svyglm(w4.cigarettes ~ delta_w1_w4_GE*factor(above_school_avg) + race + pseudo.gpa +
+                  sespc_al + nhood1_d + factor(w1.cigarettes), 
+               design=subset(final.weighted, in_sample == 1), family = 'quasibinomial')
+
+stargazer(s.0, s.1, s.2, s.3, s.4, s.5, title="Results From 5 Models Predicting Smoking", align=TRUE,
+         type ='html')
+```
+
+
+<table style="text-align:center"><caption><strong>Results From 5 Models Predicting Smoking</strong></caption>
+<tr><td colspan="7" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left"></td><td colspan="6"><em>Dependent variable:</em></td></tr>
+<tr><td></td><td colspan="6" style="border-bottom: 1px solid black"></td></tr>
+<tr><td style="text-align:left"></td><td colspan="6">w4.cigarettes</td></tr>
+<tr><td style="text-align:left"></td><td>(1)</td><td>(2)</td><td>(3)</td><td>(4)</td><td>(5)</td><td>(6)</td></tr>
+<tr><td colspan="7" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left">w1.GE_male_std</td><td>0.081<sup>**</sup></td><td>0.031</td><td></td><td></td><td>-0.003</td><td></td></tr>
+<tr><td style="text-align:left"></td><td>(0.035)</td><td>(0.037)</td><td></td><td></td><td>(0.038)</td><td></td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">w4.GE_male_std</td><td></td><td></td><td>0.275<sup>***</sup></td><td></td><td>0.276<sup>***</sup></td><td></td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td>(0.041)</td><td></td><td>(0.042)</td><td></td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">delta_w1_w4_GE</td><td></td><td></td><td></td><td>0.136<sup>***</sup></td><td></td><td>0.278<sup>***</sup></td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td>(0.030)</td><td></td><td>(0.049)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">factor(above_school_avg)1</td><td></td><td></td><td></td><td></td><td></td><td>0.440<sup>***</sup></td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td>(0.104)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">raceAmerican Indian or Native American only</td><td>-0.146</td><td>0.013</td><td>0.0003</td><td>0.027</td><td>0.001</td><td>-0.023</td></tr>
+<tr><td style="text-align:left"></td><td>(0.344)</td><td>(0.391)</td><td>(0.390)</td><td>(0.417)</td><td>(0.391)</td><td>(0.412)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">raceAsian or Pacific Islander ony</td><td>-0.133</td><td>0.106</td><td>0.163</td><td>0.127</td><td>0.163</td><td>0.130</td></tr>
+<tr><td style="text-align:left"></td><td>(0.239)</td><td>(0.267)</td><td>(0.274)</td><td>(0.265)</td><td>(0.274)</td><td>(0.266)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">raceBlack or AA only</td><td>-0.643<sup>***</sup></td><td>-0.398<sup>**</sup></td><td>-0.369<sup>**</sup></td><td>-0.346<sup>**</sup></td><td>-0.368<sup>**</sup></td><td>-0.354<sup>**</sup></td></tr>
+<tr><td style="text-align:left"></td><td>(0.153)</td><td>(0.172)</td><td>(0.174)</td><td>(0.173)</td><td>(0.173)</td><td>(0.171)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">raceMultiple Races or Other</td><td>-0.384<sup>***</sup></td><td>-0.325<sup>**</sup></td><td>-0.301<sup>**</sup></td><td>-0.320<sup>**</sup></td><td>-0.301<sup>**</sup></td><td>-0.323<sup>**</sup></td></tr>
+<tr><td style="text-align:left"></td><td>(0.124)</td><td>(0.128)</td><td>(0.131)</td><td>(0.130)</td><td>(0.131)</td><td>(0.129)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">pseudo.gpa</td><td>-0.567<sup>***</sup></td><td>-0.431<sup>***</sup></td><td>-0.414<sup>***</sup></td><td>-0.433<sup>***</sup></td><td>-0.414<sup>***</sup></td><td>-0.420<sup>***</sup></td></tr>
+<tr><td style="text-align:left"></td><td>(0.060)</td><td>(0.061)</td><td>(0.061)</td><td>(0.062)</td><td>(0.061)</td><td>(0.062)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">sespc_al</td><td>0.037</td><td>0.046</td><td>0.043</td><td>0.042</td><td>0.043</td><td>0.040</td></tr>
+<tr><td style="text-align:left"></td><td>(0.034)</td><td>(0.037)</td><td>(0.037)</td><td>(0.037)</td><td>(0.037)</td><td>(0.038)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">nhood1_d</td><td>0.006</td><td>0.006</td><td>0.007</td><td>0.007</td><td>0.007</td><td>0.006</td></tr>
+<tr><td style="text-align:left"></td><td>(0.005)</td><td>(0.005)</td><td>(0.005)</td><td>(0.005)</td><td>(0.005)</td><td>(0.005)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">factor(w1.cigarettes)1</td><td></td><td>1.749<sup>***</sup></td><td>1.738<sup>***</sup></td><td>1.768<sup>***</sup></td><td>1.739<sup>***</sup></td><td>1.753<sup>***</sup></td></tr>
+<tr><td style="text-align:left"></td><td></td><td>(0.101)</td><td>(0.101)</td><td>(0.102)</td><td>(0.102)</td><td>(0.102)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">delta_w1_w4_GE:factor(above_school_avg)1</td><td></td><td></td><td></td><td></td><td></td><td>-0.106<sup>*</sup></td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td>(0.060)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">Constant</td><td>1.554<sup>***</sup></td><td>0.730<sup>***</sup></td><td>0.657<sup>***</sup></td><td>0.699<sup>***</sup></td><td>0.657<sup>***</sup></td><td>0.372</td></tr>
+<tr><td style="text-align:left"></td><td>(0.215)</td><td>(0.234)</td><td>(0.235)</td><td>(0.232)</td><td>(0.235)</td><td>(0.250)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td colspan="7" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left">Observations</td><td>6,282</td><td>6,235</td><td>6,235</td><td>6,235</td><td>6,235</td><td>6,235</td></tr>
+<tr><td colspan="7" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left"><em>Note:</em></td><td colspan="6" style="text-align:right"><sup>*</sup>p<0.1; <sup>**</sup>p<0.05; <sup>***</sup>p<0.01</td></tr>
+</table>
+
+
+```{r,results='hide'}
+m.0 <- svyglm(w4.marijuana ~ w1.GE_male_std + race + pseudo.gpa +
+                  sespc_al + nhood1_d, 
+               design=subset(final.weighted, in_sample == 1), family = 'quasibinomial')
+
+m.1 <- svyglm(w4.marijuana ~ w1.GE_male_std + race + pseudo.gpa +
+                  sespc_al + nhood1_d + factor(w1.marijuana), 
+               design=subset(final.weighted, in_sample == 1), family = 'quasibinomial')
+
+m.2 <- svyglm(w4.marijuana ~ w4.GE_male_std + race + pseudo.gpa +
+                  sespc_al + nhood1_d + factor(w1.marijuana), 
+               design=subset(final.weighted, in_sample == 1), family = 'quasibinomial')
+
+m.3 <- svyglm(w4.marijuana ~ delta_w1_w4_GE + race + pseudo.gpa +
+                  sespc_al + nhood1_d + factor(w1.marijuana), 
+               design=subset(final.weighted, in_sample == 1), family = 'quasibinomial')
+
+m.4 <- svyglm(w4.marijuana ~ w1.GE_male_std + w4.GE_male_std + race + pseudo.gpa +
+                  sespc_al + nhood1_d + factor(w1.marijuana), 
+               design=subset(final.weighted, in_sample == 1), family = 'quasibinomial')
+
+m.5 <- svyglm(w4.marijuana ~ delta_w1_w4_GE*factor(above_school_avg) + race + pseudo.gpa +
+                  sespc_al + nhood1_d + factor(w1.marijuana), 
+               design=subset(final.weighted, in_sample == 1), family = 'quasibinomial')
+
+stargazer(m.0, m.1, m.2, m.3, m.4, m.5, title="Results From 5 Models Predicting Marijuana Use", align=TRUE, 
+          type = 'html')
+```
+<table style="text-align:center"><caption><strong>Results From 5 Models Predicting Marijuana Use</strong></caption>
+<tr><td colspan="7" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left"></td><td colspan="6"><em>Dependent variable:</em></td></tr>
+<tr><td></td><td colspan="6" style="border-bottom: 1px solid black"></td></tr>
+<tr><td style="text-align:left"></td><td colspan="6">w4.marijuana</td></tr>
+<tr><td style="text-align:left"></td><td>(1)</td><td>(2)</td><td>(3)</td><td>(4)</td><td>(5)</td><td>(6)</td></tr>
+<tr><td colspan="7" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left">w1.GE_male_std</td><td>0.166<sup>***</sup></td><td>0.124<sup>***</sup></td><td></td><td></td><td>0.080<sup>**</sup></td><td></td></tr>
+<tr><td style="text-align:left"></td><td>(0.034)</td><td>(0.035)</td><td></td><td></td><td>(0.037)</td><td></td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">w4.GE_male_std</td><td></td><td></td><td>0.338<sup>***</sup></td><td></td><td>0.328<sup>***</sup></td><td></td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td>(0.040)</td><td></td><td>(0.041)</td><td></td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">delta_w1_w4_GE</td><td></td><td></td><td></td><td>0.124<sup>***</sup></td><td></td><td>0.184<sup>***</sup></td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td>(0.029)</td><td></td><td>(0.054)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">factor(above_school_avg)1</td><td></td><td></td><td></td><td></td><td></td><td>0.542<sup>***</sup></td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td>(0.094)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">raceAmerican Indian or Native American only</td><td>-0.077</td><td>-0.395</td><td>-0.395</td><td>-0.391</td><td>-0.395</td><td>-0.426</td></tr>
+<tr><td style="text-align:left"></td><td>(0.422)</td><td>(0.396)</td><td>(0.411)</td><td>(0.389)</td><td>(0.415)</td><td>(0.410)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">raceAsian or Pacific Islander ony</td><td>-0.131</td><td>-0.070</td><td>0.008</td><td>-0.045</td><td>0.008</td><td>-0.006</td></tr>
+<tr><td style="text-align:left"></td><td>(0.196)</td><td>(0.181)</td><td>(0.177)</td><td>(0.173)</td><td>(0.178)</td><td>(0.176)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">raceBlack or AA only</td><td>-0.395<sup>***</sup></td><td>-0.380<sup>***</sup></td><td>-0.325<sup>**</sup></td><td>-0.317<sup>**</sup></td><td>-0.343<sup>**</sup></td><td>-0.325<sup>**</sup></td></tr>
+<tr><td style="text-align:left"></td><td>(0.140)</td><td>(0.142)</td><td>(0.141)</td><td>(0.141)</td><td>(0.141)</td><td>(0.139)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">raceMultiple Races or Other</td><td>-0.089</td><td>-0.164</td><td>-0.144</td><td>-0.176</td><td>-0.139</td><td>-0.161</td></tr>
+<tr><td style="text-align:left"></td><td>(0.122)</td><td>(0.123)</td><td>(0.128)</td><td>(0.126)</td><td>(0.127)</td><td>(0.125)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">pseudo.gpa</td><td>-0.263<sup>***</sup></td><td>-0.116<sup>**</sup></td><td>-0.095<sup>*</sup></td><td>-0.122<sup>**</sup></td><td>-0.091<sup>*</sup></td><td>-0.105<sup>*</sup></td></tr>
+<tr><td style="text-align:left"></td><td>(0.053)</td><td>(0.054)</td><td>(0.054)</td><td>(0.053)</td><td>(0.054)</td><td>(0.054)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">sespc_al</td><td>0.178<sup>***</sup></td><td>0.169<sup>***</sup></td><td>0.168<sup>***</sup></td><td>0.164<sup>***</sup></td><td>0.170<sup>***</sup></td><td>0.164<sup>***</sup></td></tr>
+<tr><td style="text-align:left"></td><td>(0.033)</td><td>(0.034)</td><td>(0.034)</td><td>(0.034)</td><td>(0.034)</td><td>(0.034)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">nhood1_d</td><td>-0.009<sup>*</sup></td><td>-0.009<sup>**</sup></td><td>-0.009<sup>*</sup></td><td>-0.008<sup>*</sup></td><td>-0.009<sup>*</sup></td><td>-0.009<sup>*</sup></td></tr>
+<tr><td style="text-align:left"></td><td>(0.005)</td><td>(0.005)</td><td>(0.005)</td><td>(0.005)</td><td>(0.005)</td><td>(0.005)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">factor(w1.marijuana)1</td><td></td><td>1.424<sup>***</sup></td><td>1.440<sup>***</sup></td><td>1.466<sup>***</sup></td><td>1.425<sup>***</sup></td><td>1.446<sup>***</sup></td></tr>
+<tr><td style="text-align:left"></td><td></td><td>(0.112)</td><td>(0.114)</td><td>(0.113)</td><td>(0.115)</td><td>(0.113)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">delta_w1_w4_GE:factor(above_school_avg)1</td><td></td><td></td><td></td><td></td><td></td><td>0.116<sup>*</sup></td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td>(0.068)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">Constant</td><td>1.487<sup>***</sup></td><td>0.753<sup>***</sup></td><td>0.659<sup>***</sup></td><td>0.716<sup>***</sup></td><td>0.664<sup>***</sup></td><td>0.405<sup>*</sup></td></tr>
+<tr><td style="text-align:left"></td><td>(0.197)</td><td>(0.206)</td><td>(0.208)</td><td>(0.201)</td><td>(0.209)</td><td>(0.215)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td colspan="7" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left">Observations</td><td>6,254</td><td>6,213</td><td>6,213</td><td>6,213</td><td>6,213</td><td>6,213</td></tr>
+<tr><td colspan="7" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left"><em>Note:</em></td><td colspan="6" style="text-align:right"><sup>*</sup>p<0.1; <sup>**</sup>p<0.05; <sup>***</sup>p<0.01</td></tr>
+</table>
+
+```{r,results='hide'}
+d.0 <- svyglm(w4.drunk ~ w1.GE_male_std + race + pseudo.gpa +
+                  sespc_al + nhood1_d, 
+               design=subset(final.weighted, in_sample == 1), family = 'quasibinomial')
+
+d.1 <- svyglm(w4.drunk ~ w1.GE_male_std + race + pseudo.gpa +
+                  sespc_al + nhood1_d + factor(w1.drunk), 
+               design=subset(final.weighted, in_sample == 1), family = 'quasibinomial')
+
+d.2 <- svyglm(w4.drunk ~ w4.GE_male_std + race + pseudo.gpa +
+                  sespc_al + nhood1_d + factor(w1.drunk), 
+               design=subset(final.weighted, in_sample == 1), family = 'quasibinomial')
+
+d.3 <- svyglm(w4.drunk ~ delta_w1_w4_GE + race + pseudo.gpa +
+                  sespc_al + nhood1_d + factor(w1.drunk), 
+               design=subset(final.weighted, in_sample == 1), family = 'quasibinomial')
+
+d.4 <- svyglm(w4.drunk ~ w1.GE_male_std + w4.GE_male_std + race + pseudo.gpa +
+                  sespc_al + nhood1_d + factor(w1.drunk), 
+               design=subset(final.weighted, in_sample == 1), family = 'quasibinomial')
+
+d.5 <- svyglm(w4.drunk ~ delta_w1_w4_GE*factor(above_school_avg) + race + pseudo.gpa +
+                  sespc_al + nhood1_d + factor(w1.drunk), 
+               design=subset(final.weighted, in_sample == 1), family = 'quasibinomial')
+
+stargazer(d.0, d.1, d.2, d.3, d.4, d.5, 
+          title="Results From 5 Models Predicting Excessing Alcohol Use", align=TRUE,
+          type= 'html')
+```
+
+<table style="text-align:center"><caption><strong>Results From 5 Models Predicting Excessing Alcohol Use</strong></caption>
+<tr><td colspan="7" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left"></td><td colspan="6"><em>Dependent variable:</em></td></tr>
+<tr><td></td><td colspan="6" style="border-bottom: 1px solid black"></td></tr>
+<tr><td style="text-align:left"></td><td colspan="6">w4.drunk</td></tr>
+<tr><td style="text-align:left"></td><td>(1)</td><td>(2)</td><td>(3)</td><td>(4)</td><td>(5)</td><td>(6)</td></tr>
+<tr><td colspan="7" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left">w1.GE_male_std</td><td>0.111<sup>***</sup></td><td>0.068<sup>*</sup></td><td></td><td></td><td>0.033</td><td></td></tr>
+<tr><td style="text-align:left"></td><td>(0.038)</td><td>(0.038)</td><td></td><td></td><td>(0.039)</td><td></td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">w4.GE_male_std</td><td></td><td></td><td>0.278<sup>***</sup></td><td></td><td>0.274<sup>***</sup></td><td></td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td>(0.035)</td><td></td><td>(0.035)</td><td></td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">delta_w1_w4_GE</td><td></td><td></td><td></td><td>0.119<sup>***</sup></td><td></td><td>0.209<sup>***</sup></td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td>(0.027)</td><td></td><td>(0.048)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">factor(above_school_avg)1</td><td></td><td></td><td></td><td></td><td></td><td>0.450<sup>***</sup></td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td>(0.094)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">raceAmerican Indian or Native American only</td><td>0.017</td><td>-0.011</td><td>-0.017</td><td>-0.001</td><td>-0.020</td><td>-0.042</td></tr>
+<tr><td style="text-align:left"></td><td>(0.371)</td><td>(0.395)</td><td>(0.378)</td><td>(0.400)</td><td>(0.376)</td><td>(0.388)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">raceAsian or Pacific Islander ony</td><td>-0.395<sup>*</sup></td><td>-0.295</td><td>-0.242</td><td>-0.276</td><td>-0.242</td><td>-0.261</td></tr>
+<tr><td style="text-align:left"></td><td>(0.202)</td><td>(0.201)</td><td>(0.198)</td><td>(0.188)</td><td>(0.201)</td><td>(0.193)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">raceBlack or AA only</td><td>-0.775<sup>***</sup></td><td>-0.685<sup>***</sup></td><td>-0.645<sup>***</sup></td><td>-0.627<sup>***</sup></td><td>-0.654<sup>***</sup></td><td>-0.637<sup>***</sup></td></tr>
+<tr><td style="text-align:left"></td><td>(0.101)</td><td>(0.101)</td><td>(0.101)</td><td>(0.099)</td><td>(0.102)</td><td>(0.101)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">raceMultiple Races or Other</td><td>-0.275<sup>**</sup></td><td>-0.243<sup>*</sup></td><td>-0.227<sup>*</sup></td><td>-0.246<sup>*</sup></td><td>-0.226<sup>*</sup></td><td>-0.243<sup>*</sup></td></tr>
+<tr><td style="text-align:left"></td><td>(0.123)</td><td>(0.131)</td><td>(0.130)</td><td>(0.131)</td><td>(0.130)</td><td>(0.131)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">pseudo.gpa</td><td>0.021</td><td>0.066</td><td>0.090<sup>*</sup></td><td>0.065</td><td>0.092<sup>*</sup></td><td>0.082</td></tr>
+<tr><td style="text-align:left"></td><td>(0.054)</td><td>(0.053)</td><td>(0.052)</td><td>(0.051)</td><td>(0.053)</td><td>(0.053)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">sespc_al</td><td>0.188<sup>***</sup></td><td>0.177<sup>***</sup></td><td>0.177<sup>***</sup></td><td>0.174<sup>***</sup></td><td>0.177<sup>***</sup></td><td>0.173<sup>***</sup></td></tr>
+<tr><td style="text-align:left"></td><td>(0.033)</td><td>(0.034)</td><td>(0.034)</td><td>(0.034)</td><td>(0.034)</td><td>(0.034)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">nhood1_d</td><td>-0.015<sup>***</sup></td><td>-0.015<sup>***</sup></td><td>-0.015<sup>***</sup></td><td>-0.015<sup>***</sup></td><td>-0.015<sup>***</sup></td><td>-0.015<sup>***</sup></td></tr>
+<tr><td style="text-align:left"></td><td>(0.004)</td><td>(0.005)</td><td>(0.004)</td><td>(0.004)</td><td>(0.004)</td><td>(0.004)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">factor(w1.drunk)1</td><td></td><td>0.750<sup>***</sup></td><td>0.729<sup>***</sup></td><td>0.789<sup>***</sup></td><td>0.719<sup>***</sup></td><td>0.745<sup>***</sup></td></tr>
+<tr><td style="text-align:left"></td><td></td><td>(0.097)</td><td>(0.096)</td><td>(0.095)</td><td>(0.097)</td><td>(0.094)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">delta_w1_w4_GE:factor(above_school_avg)1</td><td></td><td></td><td></td><td></td><td></td><td>0.010</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td>(0.067)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">Constant</td><td>0.849<sup>***</sup></td><td>0.508<sup>**</sup></td><td>0.428<sup>**</sup></td><td>0.467<sup>**</sup></td><td>0.431<sup>**</sup></td><td>0.179</td></tr>
+<tr><td style="text-align:left"></td><td>(0.193)</td><td>(0.200)</td><td>(0.200)</td><td>(0.197)</td><td>(0.201)</td><td>(0.222)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td colspan="7" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left">Observations</td><td>6,259</td><td>6,243</td><td>6,243</td><td>6,243</td><td>6,243</td><td>6,243</td></tr>
+<tr><td colspan="7" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left"><em>Note:</em></td><td colspan="6" style="text-align:right"><sup>*</sup>p<0.1; <sup>**</sup>p<0.05; <sup>***</sup>p<0.01</td></tr>
+</table>
+
+
+```{r,results='hide'}
+
+r.0 <- svyglm(w4.recreational ~ w1.GE_male_std + race + pseudo.gpa +
+                  sespc_al + nhood1_d, 
+               design=subset(final.weighted, in_sample == 1), family = 'quasibinomial')
+
+
+r.1 <- svyglm(w4.recreational ~ w1.GE_male_std + race + pseudo.gpa +
+                  sespc_al + nhood1_d + factor(w1.recreational), 
+               design=subset(final.weighted, in_sample == 1), family = 'quasibinomial')
+
+r.2 <- svyglm(w4.recreational ~ w4.GE_male_std + race + pseudo.gpa +
+                  sespc_al + nhood1_d + factor(w1.recreational), 
+               design=subset(final.weighted, in_sample == 1), family = 'quasibinomial')
+
+r.3 <- svyglm(w4.recreational ~ delta_w1_w4_GE + race + pseudo.gpa +
+                  sespc_al + nhood1_d + factor(w1.recreational), 
+               design=subset(final.weighted, in_sample == 1), family = 'quasibinomial')
+
+r.4 <- svyglm(w4.recreational ~ w1.GE_male_std + w4.GE_male_std + race + pseudo.gpa +
+                  sespc_al + nhood1_d + factor(w1.recreational), 
+               design=subset(final.weighted, in_sample == 1), family = 'quasibinomial')
+
+r.5 <- svyglm(w4.recreational ~ delta_w1_w4_GE*factor(above_school_avg) + race + pseudo.gpa +
+                  sespc_al + nhood1_d + factor(w1.recreational), 
+               design=subset(final.weighted, in_sample == 1), family = 'quasibinomial')
+
+stargazer(r.0, r.1, r.2, r.3, r.4, r.5, 
+          title="Results From 5 Models Recreational Drug Use", align=TRUE, type ='html')
+```
+
+<table style="text-align:center"><caption><strong>Results From 5 Models Recreational Drug Use</strong></caption>
+<tr><td colspan="7" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left"></td><td colspan="6"><em>Dependent variable:</em></td></tr>
+<tr><td></td><td colspan="6" style="border-bottom: 1px solid black"></td></tr>
+<tr><td style="text-align:left"></td><td colspan="6">w4.recreational</td></tr>
+<tr><td style="text-align:left"></td><td>(1)</td><td>(2)</td><td>(3)</td><td>(4)</td><td>(5)</td><td>(6)</td></tr>
+<tr><td colspan="7" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left">w1.GE_male_std</td><td>0.136<sup>***</sup></td><td>0.130<sup>***</sup></td><td></td><td></td><td>0.091<sup>**</sup></td><td></td></tr>
+<tr><td style="text-align:left"></td><td>(0.036)</td><td>(0.035)</td><td></td><td></td><td>(0.036)</td><td></td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">w4.GE_male_std</td><td></td><td></td><td>0.329<sup>***</sup></td><td></td><td>0.316<sup>***</sup></td><td></td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td>(0.045)</td><td></td><td>(0.045)</td><td></td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">delta_w1_w4_GE</td><td></td><td></td><td></td><td>0.103<sup>***</sup></td><td></td><td>0.199<sup>***</sup></td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td>(0.028)</td><td></td><td>(0.047)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">factor(above_school_avg)1</td><td></td><td></td><td></td><td></td><td></td><td>0.587<sup>***</sup></td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td>(0.104)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">raceAmerican Indian or Native American only</td><td>0.324</td><td>0.316</td><td>0.304</td><td>0.299</td><td>0.311</td><td>0.261</td></tr>
+<tr><td style="text-align:left"></td><td>(0.379)</td><td>(0.462)</td><td>(0.468)</td><td>(0.454)</td><td>(0.473)</td><td>(0.473)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">raceAsian or Pacific Islander ony</td><td>-0.399<sup>**</sup></td><td>-0.320<sup>*</sup></td><td>-0.264</td><td>-0.317<sup>*</sup></td><td>-0.257</td><td>-0.284</td></tr>
+<tr><td style="text-align:left"></td><td>(0.167)</td><td>(0.169)</td><td>(0.184)</td><td>(0.173)</td><td>(0.183)</td><td>(0.182)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">raceBlack or AA only</td><td>-1.542<sup>***</sup></td><td>-1.386<sup>***</sup></td><td>-1.328<sup>***</sup></td><td>-1.322<sup>***</sup></td><td>-1.352<sup>***</sup></td><td>-1.328<sup>***</sup></td></tr>
+<tr><td style="text-align:left"></td><td>(0.169)</td><td>(0.173)</td><td>(0.175)</td><td>(0.174)</td><td>(0.175)</td><td>(0.171)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">raceMultiple Races or Other</td><td>-0.138</td><td>-0.101</td><td>-0.075</td><td>-0.104</td><td>-0.071</td><td>-0.090</td></tr>
+<tr><td style="text-align:left"></td><td>(0.105)</td><td>(0.106)</td><td>(0.106)</td><td>(0.107)</td><td>(0.105)</td><td>(0.107)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">pseudo.gpa</td><td>-0.248<sup>***</sup></td><td>-0.189<sup>***</sup></td><td>-0.168<sup>***</sup></td><td>-0.198<sup>***</sup></td><td>-0.162<sup>***</sup></td><td>-0.172<sup>***</sup></td></tr>
+<tr><td style="text-align:left"></td><td>(0.053)</td><td>(0.053)</td><td>(0.051)</td><td>(0.052)</td><td>(0.052)</td><td>(0.053)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">sespc_al</td><td>0.102<sup>***</sup></td><td>0.094<sup>***</sup></td><td>0.092<sup>**</sup></td><td>0.090<sup>**</sup></td><td>0.093<sup>**</sup></td><td>0.088<sup>**</sup></td></tr>
+<tr><td style="text-align:left"></td><td>(0.034)</td><td>(0.035)</td><td>(0.036)</td><td>(0.035)</td><td>(0.036)</td><td>(0.036)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">nhood1_d</td><td>-0.011<sup>**</sup></td><td>-0.011<sup>**</sup></td><td>-0.011<sup>**</sup></td><td>-0.010<sup>**</sup></td><td>-0.011<sup>**</sup></td><td>-0.011<sup>**</sup></td></tr>
+<tr><td style="text-align:left"></td><td>(0.005)</td><td>(0.005)</td><td>(0.005)</td><td>(0.005)</td><td>(0.005)</td><td>(0.005)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">factor(w1.recreational)1</td><td></td><td>1.442<sup>***</sup></td><td>1.440<sup>***</sup></td><td>1.449<sup>***</sup></td><td>1.436<sup>***</sup></td><td>1.442<sup>***</sup></td></tr>
+<tr><td style="text-align:left"></td><td></td><td>(0.133)</td><td>(0.132)</td><td>(0.131)</td><td>(0.132)</td><td>(0.130)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">delta_w1_w4_GE:factor(above_school_avg)1</td><td></td><td></td><td></td><td></td><td></td><td>0.074</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td>(0.061)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">Constant</td><td>0.578<sup>***</sup></td><td>0.207</td><td>0.098</td><td>0.192</td><td>0.094</td><td>-0.202</td></tr>
+<tr><td style="text-align:left"></td><td>(0.200)</td><td>(0.214)</td><td>(0.209)</td><td>(0.209)</td><td>(0.211)</td><td>(0.222)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td colspan="7" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left">Observations</td><td>6,288</td><td>6,181</td><td>6,181</td><td>6,181</td><td>6,181</td><td>6,181</td></tr>
+<tr><td colspan="7" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left"><em>Note:</em></td><td colspan="6" style="text-align:right"><sup>*</sup>p<0.1; <sup>**</sup>p<0.05; <sup>***</sup>p<0.01</td></tr>
+</table>
+
+
+```{r,results='hide'}
+p.1 <- svyglm(w4.prescription ~ w1.GE_male_std + race + pseudo.gpa +
+                  sespc_al + nhood1_d , 
+               design=subset(final.weighted, in_sample == 1), family = 'quasibinomial')
+
+p.2 <- svyglm(w4.prescription ~ w4.GE_male_std + race + pseudo.gpa +
+                  sespc_al + nhood1_d , 
+               design=subset(final.weighted, in_sample == 1), family = 'quasibinomial')
+
+p.3 <- svyglm(w4.prescription ~ delta_w1_w4_GE + race + pseudo.gpa +
+                  sespc_al + nhood1_d , 
+               design=subset(final.weighted, in_sample == 1), family = 'quasibinomial')
+
+p.4 <- svyglm(w4.prescription ~ w1.GE_male_std + w4.GE_male_std + race + pseudo.gpa +
+                  sespc_al + nhood1_d , 
+               design=subset(final.weighted, in_sample == 1), family = 'quasibinomial')
+
+p.5 <- svyglm(w4.prescription ~ delta_w1_w4_GE*factor(above_school_avg) + race + pseudo.gpa +
+                  sespc_al + nhood1_d, 
+               design=subset(final.weighted, in_sample == 1), family = 'quasibinomial')
+
+stargazer(p.1, p.2, p.3, p.4, p.5, 
+          title="Results From 5 Models Predicting Prescription Drug Misuse", align=TRUE, type='html')
+```
+
+<table style="text-align:center"><caption><strong>Results From 5 Models Predicting Prescription Drug Misuse</strong></caption>
+<tr><td colspan="6" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left"></td><td colspan="5"><em>Dependent variable:</em></td></tr>
+<tr><td></td><td colspan="5" style="border-bottom: 1px solid black"></td></tr>
+<tr><td style="text-align:left"></td><td colspan="5">w4.prescription</td></tr>
+<tr><td style="text-align:left"></td><td>(1)</td><td>(2)</td><td>(3)</td><td>(4)</td><td>(5)</td></tr>
+<tr><td colspan="6" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left">w1.GE_male_std</td><td>0.039</td><td></td><td></td><td>0.012</td><td></td></tr>
+<tr><td style="text-align:left"></td><td>(0.048)</td><td></td><td></td><td>(0.050)</td><td></td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">w4.GE_male_std</td><td></td><td>0.204<sup>***</sup></td><td></td><td>0.202<sup>***</sup></td><td></td></tr>
+<tr><td style="text-align:left"></td><td></td><td>(0.042)</td><td></td><td>(0.043)</td><td></td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">delta_w1_w4_GE</td><td></td><td></td><td>0.088<sup>**</sup></td><td></td><td>0.190<sup>***</sup></td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td>(0.036)</td><td></td><td>(0.052)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">factor(above_school_avg)1</td><td></td><td></td><td></td><td></td><td>0.388<sup>***</sup></td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td>(0.105)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">raceAmerican Indian or Native American only</td><td>0.185</td><td>0.193</td><td>0.188</td><td>0.193</td><td>0.162</td></tr>
+<tr><td style="text-align:left"></td><td>(0.398)</td><td>(0.397)</td><td>(0.389)</td><td>(0.398)</td><td>(0.395)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">raceAsian or Pacific Islander ony</td><td>-0.862<sup>***</sup></td><td>-0.824<sup>***</sup></td><td>-0.854<sup>***</sup></td><td>-0.824<sup>***</sup></td><td>-0.841<sup>***</sup></td></tr>
+<tr><td style="text-align:left"></td><td>(0.277)</td><td>(0.279)</td><td>(0.275)</td><td>(0.279)</td><td>(0.277)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">raceBlack or AA only</td><td>-1.512<sup>***</sup></td><td>-1.479<sup>***</sup></td><td>-1.474<sup>***</sup></td><td>-1.482<sup>***</sup></td><td>-1.475<sup>***</sup></td></tr>
+<tr><td style="text-align:left"></td><td>(0.164)</td><td>(0.166)</td><td>(0.164)</td><td>(0.164)</td><td>(0.166)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">raceMultiple Races or Other</td><td>-0.437<sup>**</sup></td><td>-0.421<sup>**</sup></td><td>-0.437<sup>**</sup></td><td>-0.421<sup>**</sup></td><td>-0.434<sup>**</sup></td></tr>
+<tr><td style="text-align:left"></td><td>(0.170)</td><td>(0.170)</td><td>(0.171)</td><td>(0.170)</td><td>(0.169)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">pseudo.gpa</td><td>-0.128<sup>**</sup></td><td>-0.109<sup>*</sup></td><td>-0.129<sup>**</sup></td><td>-0.108<sup>*</sup></td><td>-0.112<sup>**</sup></td></tr>
+<tr><td style="text-align:left"></td><td>(0.056)</td><td>(0.056)</td><td>(0.056)</td><td>(0.056)</td><td>(0.056)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">sespc_al</td><td>0.102<sup>**</sup></td><td>0.102<sup>**</sup></td><td>0.101<sup>**</sup></td><td>0.102<sup>**</sup></td><td>0.100<sup>**</sup></td></tr>
+<tr><td style="text-align:left"></td><td>(0.042)</td><td>(0.042)</td><td>(0.042)</td><td>(0.042)</td><td>(0.042)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">nhood1_d</td><td>-0.002</td><td>-0.001</td><td>-0.001</td><td>-0.002</td><td>-0.002</td></tr>
+<tr><td style="text-align:left"></td><td>(0.005)</td><td>(0.005)</td><td>(0.005)</td><td>(0.005)</td><td>(0.005)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">delta_w1_w4_GE:factor(above_school_avg)1</td><td></td><td></td><td></td><td></td><td>-0.040</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td>(0.069)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">Constant</td><td>-0.685<sup>***</sup></td><td>-0.768<sup>***</sup></td><td>-0.707<sup>***</sup></td><td>-0.769<sup>***</sup></td><td>-0.999<sup>***</sup></td></tr>
+<tr><td style="text-align:left"></td><td>(0.227)</td><td>(0.225)</td><td>(0.224)</td><td>(0.225)</td><td>(0.239)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td colspan="6" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left">Observations</td><td>6,253</td><td>6,253</td><td>6,253</td><td>6,253</td><td>6,253</td></tr>
+<tr><td colspan="6" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left"><em>Note:</em></td><td colspan="5" style="text-align:right"><sup>*</sup>p<0.1; <sup>**</sup>p<0.05; <sup>***</sup>p<0.01</td></tr>
+</table>
+
+```{r,results='hide'}
+net.weighted <- svydesign(id=~psuscid, strata=~region,
+                            weights=~gswgt4_2, data=network, nest=TRUE)
+
+m0 <- svyglm(delta_w1_w4_GE ~ race + pseudo.gpa +
+         sespc_al + nhood1_d + w1.GE_male_std_school, 
+               design=subset(net.weighted, in_sample == 1))
+
+
+m1 <- svyglm(delta_w1_w4_GE ~ race + pseudo.gpa +
+         sespc_al + nhood1_d + katz_centrality_R, 
+               design=subset(net.weighted, in_sample == 1))
+
+m2 <- svyglm(delta_w1_w4_GE ~ race + pseudo.gpa +
+         sespc_al + nhood1_d + mbff_reciprocity, 
+               design=subset(net.weighted, in_sample == 1)) 
+
+
+m3 <- svyglm(delta_w1_w4_GE ~ race + pseudo.gpa +
+         sespc_al + nhood1_d + fbff_reciprocity, 
+               design=subset(net.weighted, in_sample == 1))
+
+m4 <- svyglm(delta_w1_w4_GE ~ race + pseudo.gpa +
+         sespc_al + nhood1_d + num_friend_noms, 
+               design=subset(net.weighted, in_sample == 1))
+
+
+m5 <- svyglm(delta_w1_w4_GE ~ race + pseudo.gpa +
+         sespc_al + nhood1_d + num_bff_noms, 
+               design=subset(net.weighted, in_sample == 1))
+
+
+m6 <- svyglm(delta_w1_w4_GE ~ race + pseudo.gpa +
+         sespc_al + nhood1_d + katz_centrality_R + 
+         num_bff_noms + num_friend_noms + w1.GE_male_std_school +
+         mbff_reciprocity + fbff_reciprocity, 
+               design=subset(net.weighted, in_sample == 1)) 
+
+
+stargazer(m0, m1, m2, m3, m4, m5, m6,
+          title="Results From Models Predicting Delta GE", align=TRUE, type='html')
+```
+
+<table style="text-align:center"><caption><strong>Results From Models Predicting Delta GE</strong></caption>
+<tr><td colspan="8" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left"></td><td colspan="7"><em>Dependent variable:</em></td></tr>
+<tr><td></td><td colspan="7" style="border-bottom: 1px solid black"></td></tr>
+<tr><td style="text-align:left"></td><td colspan="7">delta_w1_w4_GE</td></tr>
+<tr><td style="text-align:left"></td><td>(1)</td><td>(2)</td><td>(3)</td><td>(4)</td><td>(5)</td><td>(6)</td><td>(7)</td></tr>
+<tr><td colspan="8" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left">raceAmerican Indian or Native American only</td><td>0.148</td><td>0.291</td><td>0.301</td><td>0.311</td><td>0.287</td><td>0.295</td><td>0.148</td></tr>
+<tr><td style="text-align:left"></td><td>(0.271)</td><td>(0.386)</td><td>(0.387)</td><td>(0.391)</td><td>(0.387)</td><td>(0.389)</td><td>(0.271)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">raceAsian or Pacific Islander ony</td><td>-0.398<sup>***</sup></td><td>-0.327<sup>*</sup></td><td>-0.334<sup>*</sup></td><td>-0.337<sup>*</sup></td><td>-0.329<sup>*</sup></td><td>-0.331<sup>*</sup></td><td>-0.391<sup>***</sup></td></tr>
+<tr><td style="text-align:left"></td><td>(0.127)</td><td>(0.193)</td><td>(0.192)</td><td>(0.192)</td><td>(0.192)</td><td>(0.192)</td><td>(0.130)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">raceBlack or AA only</td><td>-0.211<sup>***</sup></td><td>-0.327<sup>***</sup></td><td>-0.331<sup>***</sup></td><td>-0.335<sup>***</sup></td><td>-0.330<sup>***</sup></td><td>-0.331<sup>***</sup></td><td>-0.205<sup>***</sup></td></tr>
+<tr><td style="text-align:left"></td><td>(0.068)</td><td>(0.077)</td><td>(0.077)</td><td>(0.077)</td><td>(0.076)</td><td>(0.077)</td><td>(0.070)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">raceMultiple Races or Other</td><td>-0.062</td><td>-0.023</td><td>-0.026</td><td>-0.029</td><td>-0.025</td><td>-0.025</td><td>-0.055</td></tr>
+<tr><td style="text-align:left"></td><td>(0.082)</td><td>(0.110)</td><td>(0.110)</td><td>(0.110)</td><td>(0.110)</td><td>(0.110)</td><td>(0.082)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">pseudo.gpa</td><td>-0.019</td><td>0.037</td><td>0.039</td><td>0.040</td><td>0.036</td><td>0.039</td><td>-0.027</td></tr>
+<tr><td style="text-align:left"></td><td>(0.032)</td><td>(0.042)</td><td>(0.042)</td><td>(0.042)</td><td>(0.042)</td><td>(0.042)</td><td>(0.031)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">sespc_al</td><td>0.008</td><td>0.011</td><td>0.013</td><td>0.013</td><td>0.011</td><td>0.012</td><td>0.004</td></tr>
+<tr><td style="text-align:left"></td><td>(0.020)</td><td>(0.023)</td><td>(0.023)</td><td>(0.023)</td><td>(0.023)</td><td>(0.023)</td><td>(0.020)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">nhood1_d</td><td>-0.004</td><td>-0.004</td><td>-0.004</td><td>-0.004</td><td>-0.004</td><td>-0.004</td><td>-0.004<sup>*</sup></td></tr>
+<tr><td style="text-align:left"></td><td>(0.003)</td><td>(0.003)</td><td>(0.003)</td><td>(0.003)</td><td>(0.003)</td><td>(0.003)</td><td>(0.003)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">w1.GE_male_std_school</td><td>-0.844<sup>***</sup></td><td></td><td></td><td></td><td></td><td></td><td>-0.846<sup>***</sup></td></tr>
+<tr><td style="text-align:left"></td><td>(0.021)</td><td></td><td></td><td></td><td></td><td></td><td>(0.021)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">katz_centrality_R</td><td></td><td>0.016</td><td></td><td></td><td></td><td></td><td>0.036<sup>*</sup></td></tr>
+<tr><td style="text-align:left"></td><td></td><td>(0.015)</td><td></td><td></td><td></td><td></td><td>(0.021)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">mbff_reciprocity</td><td></td><td></td><td>0.030</td><td></td><td></td><td></td><td>0.012</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td>(0.065)</td><td></td><td></td><td></td><td>(0.058)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">fbff_reciprocity</td><td></td><td></td><td></td><td>-0.044</td><td></td><td></td><td>-0.101</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td>(0.108)</td><td></td><td></td><td>(0.091)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">num_friend_noms</td><td></td><td></td><td></td><td></td><td>0.006</td><td></td><td>0.003</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td>(0.006)</td><td></td><td>(0.012)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">num_bff_noms</td><td></td><td></td><td></td><td></td><td></td><td>0.012</td><td>-0.021</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td>(0.021)</td><td>(0.027)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">Constant</td><td>0.291<sup>**</sup></td><td>0.108</td><td>0.131</td><td>0.140</td><td>0.115</td><td>0.126</td><td>0.247<sup>**</sup></td></tr>
+<tr><td style="text-align:left"></td><td>(0.119)</td><td>(0.162)</td><td>(0.157)</td><td>(0.157)</td><td>(0.159)</td><td>(0.160)</td><td>(0.122)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td colspan="8" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left">Observations</td><td>4,544</td><td>4,544</td><td>4,544</td><td>4,544</td><td>4,544</td><td>4,544</td><td>4,544</td></tr>
+<tr><td style="text-align:left">Log Likelihood</td><td>-7,918.948</td><td>-9,129.800</td><td>-9,130.432</td><td>-9,130.390</td><td>-9,129.809</td><td>-9,130.328</td><td>-7,910.913</td></tr>
+<tr><td style="text-align:left">Akaike Inf. Crit.</td><td>15,855.900</td><td>18,277.600</td><td>18,278.860</td><td>18,278.780</td><td>18,277.620</td><td>18,278.650</td><td>15,849.830</td></tr>
+<tr><td colspan="8" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left"><em>Note:</em></td><td colspan="7" style="text-align:right"><sup>*</sup>p<0.1; <sup>**</sup>p<0.05; <sup>***</sup>p<0.01</td></tr>
+</table>

@@ -4,7 +4,6 @@
 #-------------------------------------------------------------------------
 #
 # load packages ----------------------------------------------------------
-
 rm(list = ls())
 
 libs <- c("tidyverse", "haven", "labelled", 'scales')
@@ -17,8 +16,9 @@ if (any (installed_libs == F)) {
 invisible(lapply (libs, library, character.only = T))
 
 
-# Create and prepare wave 1 and wave 4 data ------------------------------
+# Create and prepare network, wave 1, and wave 4 data --------------------
 
+#source('src/prepare data/Prepare Network.R')
 source('src/prepare data/Prepare W1.R')
 source('src/prepare data/Prepare W4.R')
 
@@ -160,3 +160,5 @@ final.df <- final.df %>%
                             in_sample, 0))
 
 #-------------------------------------------------------------------------
+network <- read_csv('data/network.csv')
+final.df <- merge(final.df, network, on='aid')
