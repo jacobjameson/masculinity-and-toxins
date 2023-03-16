@@ -234,4 +234,82 @@ ggplot(data, aes(x=xvals,fill=group)) +
 
 ggsave("tables:figures/figure_2.png", width = 16, height = 10, bg = 'white')
 
+# Figure 3 ---------------------------------------------------------------
+
+s.1 <- svyglm(w4.cigarettes ~ delta_w1_w4_GE + race + pseudo.gpa +
+                sespc_al + nhood1_d + w1.cigarettes, 
+              design=subset(final.weighted, in_sample == 1), family = 'quasibinomial')
+
+m.1 <- svyglm(w4.marijuana ~ delta_w1_w4_GE + race + pseudo.gpa +
+                sespc_al + nhood1_d + w1.marijuana, 
+              design=subset(final.weighted, in_sample == 1), family = 'quasibinomial')
+
+d.1 <- svyglm(w4.drunk ~ delta_w1_w4_GE + race + pseudo.gpa +
+                sespc_al + nhood1_d + w1.drunk, 
+              design=subset(final.weighted, in_sample == 1), family = 'quasibinomial')
+
+r.1 <- svyglm(w4.recreational ~ delta_w1_w4_GE + race + pseudo.gpa +
+                sespc_al + nhood1_d + w1.recreational, 
+              design=subset(final.weighted, in_sample == 1), family = 'quasibinomial')
+
+p.1 <- svyglm(w4.prescription ~ delta_w1_w4_GE + race + pseudo.gpa +
+                sespc_al + nhood1_d, 
+              design=subset(final.weighted, in_sample == 1), family = 'quasibinomial')
+
+
+df.1 <- ggpredict(s.1, terms = c('delta_w1_w4_GE [-2:2]')) %>%
+  mutate(Variables = 'Cigarette Smoking') %>%
+  select(xvals=x, coef=predicted, lower=conf.low, upper=conf.high, Variables)
+
+df.2 <- ggpredict(m.1, terms = c('delta_w1_w4_GE [-2:2]')) %>%
+  mutate(Variables = 'Marijuana Use') %>%
+  select(xvals=x, coef=predicted, lower=conf.low, upper=conf.high, Variables)
+
+df.3 <- ggpredict(d.1, terms = c('delta_w1_w4_GE [-2:2]')) %>%
+  mutate(Variables = 'Excessive Alcohol Use') %>%
+  select(xvals=x, coef=predicted, lower=conf.low, upper=conf.high, Variables)
+
+df.4 <- ggpredict(r.1, terms = c('delta_w1_w4_GE [-2:2]')) %>%
+  mutate(Variables = 'Recreational Drug Use') %>%
+  select(xvals=x, coef=predicted, lower=conf.low, upper=conf.high, Variables)
+
+df.5 <- ggpredict(p.1, terms = c('delta_w1_w4_GE [-2:2]')) %>%
+  mutate(Variables = 'Prescription Drug Misuse') %>%
+  select(xvals=x, coef=predicted, lower=conf.low, upper=conf.high, Variables)
+
+
+data <- rbind(df.1, df.2)
+data <- rbind(data, df.3)
+data <- rbind(data, df.4)
+data <- rbind(data, df.5)
+
+data <- data %>%
+  mutate(group = 'Model 3: Chance in Adolescent to Adult GE')
+
+library(ggsci)
+ggplot(data, aes(x=xvals,fill=Variables)) +
+  geom_ribbon(aes(ymin=lower,ymax=upper), alpha=0.2) +
+  geom_line(aes(y=coef)) + 
+  theme_minimal() + theme(plot.caption = element_text(hjust = 0),
+                          text = element_text(size = 18)) +
+  geom_vline(xintercept =0, color='darkred') +
+  annotate("text", x = -1, y = 0.8, color ='black',
+           label = "GE Decreases from Adolescence \nto Young Adulthood") +
+  annotate("text", x = 1, y = 0.8, color ='black',
+           label = "GE Increases from Adolescence \nto Young Adulthood") +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1), limits =c(0.1, 0.9)) +
+  labs(fill = "Wave IV Behavior",
+       y = "Predicted Probability\n", 
+       x='\nChange in Standardized Gender Expression \nfrom Adolescence to Young Adulthood\n',
+       title = 'Marginal Effects of Change in Gender Expression on Predicted Substance Use\n',
+       caption = str_wrap('\n\nResults show that increases in adolescent GE 
+                          and young adult GE are associated with greater predicted 
+                          likelihood of young adult use of marijuana. 
+                          The effect of GE on substance use behaviors is stronger in young adults. 
+                          Model 0 does not control for baseline substance use because of 
+                          the associations between baseline substance use and adolescent GE', 150)) +
+  theme(plot.caption = element_text(hjust = 0, size = 11))
+
+ggsave("tables:figures/figure_3.png", width = 14, height = 10, bg = 'white')
+
 
