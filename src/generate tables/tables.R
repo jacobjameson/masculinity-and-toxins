@@ -71,7 +71,7 @@ gt::gtsave(as_gt(sum), file = "tables:figures/weighted.table1.pdf")
 # TABLE 2 --------------------------------------------------------------------------
 
 ### Create function for regression analysis
-reg_analysis <- function(frml, df, vcv){
+reg_analysis <- function(frml, df, vcv, log=T){
   
   #### INPUTS
   ##   frml= string containing formula of lm model
@@ -84,7 +84,12 @@ reg_analysis <- function(frml, df, vcv){
   ####Transform string into formula 
   frml1 <- as.formula(frml)
   ####Estimate regression model
-  m0 <- svyglm(formula = frml1, design = df, family = 'quasibinomial')
+  if (log == T){
+    m0 <- svyglm(formula = frml1, design = df, family = 'quasibinomial')
+  }
+  else{
+    m0 <- svyglm(formula = frml1, design = df)
+  }
   ####Robust variance-covariance matrix
   vcv_robust <- vcovHC(m0, type = vcv)
   ####Calculate new SEs
@@ -319,8 +324,58 @@ p.5.ame <- ape_analysis(
 
 p.results <- rbind(p.0, '', p.1, '', p.2, '',  p.3, '',  p.4, '',  p.5)
 
+
+
+# Delta GE ------------------------------------------------------------------
+
+m0 <- reg_analysis(
+  frml = "delta_w1_w4_GE ~ race + pseudo.gpa +
+               sespc_al + nhood1_d + w1.GE_male_std_school", 
+  df = subset(final.weighted, in_sample == 1), vcv = "HC0", F)  %>%
+  mutate(model = 'model 0')
+
+m1 <- reg_analysis(
+  frml = "delta_w1_w4_GE ~ race + pseudo.gpa +
+               sespc_al + nhood1_d + katz_centrality_R", 
+  df = subset(final.weighted, in_sample == 1), vcv = "HC0", F)  %>%
+  mutate(model = 'model 1')
+
+m2 <- reg_analysis(
+  frml = "delta_w1_w4_GE ~ race + pseudo.gpa +
+               sespc_al + nhood1_d + mbff_reciprocity", 
+  df = subset(final.weighted, in_sample == 1), vcv = "HC0", F)  %>%
+  mutate(model = 'model 2')
+
+m3 <- reg_analysis(
+  frml = "delta_w1_w4_GE ~ race + pseudo.gpa +
+               sespc_al + nhood1_d + fbff_reciprocity", 
+  df = subset(final.weighted, in_sample == 1), vcv = "HC0", F)  %>%
+  mutate(model = 'model 3')
+
+m4 <- reg_analysis(
+  frml = "delta_w1_w4_GE ~ race + pseudo.gpa +
+               sespc_al + nhood1_d + nominations", 
+  df = subset(final.weighted, in_sample == 1), vcv = "HC0", F)  %>%
+  mutate(model = 'model 4')
+
+m5 <- reg_analysis(
+  frml = "delta_w1_w4_GE ~ race + pseudo.gpa +
+               sespc_al + nhood1_d + num_bff_noms", 
+  df = subset(final.weighted, in_sample == 1), vcv = "HC0", F)  %>%
+  mutate(model = 'model 5')
+
+m6 <- reg_analysis(
+  frml = "delta_w1_w4_GE ~ race + pseudo.gpa +
+               sespc_al + nhood1_d + katz_centrality_R + 
+               num_bff_noms + nominations +
+               mbff_reciprocity + fbff_reciprocity", 
+  df = subset(final.weighted, in_sample == 1), vcv = "HC0", F)  %>%
+  mutate(model = 'model 6')
+
+result.net <- rbind(m0, '', m1, '', m2, '',  m3, '',  m4, '',  m5, '', m6)
+
 results <- rbind(s.results, '', m.results, '', a.results, '',  
-                 r.results, '',  p.results)
+                 r.results, '',  p.results, '', result.net)
 
 results.ame <- rbind(s.5.ame, '', m.5.ame, '', 
                      a.5.ame, '',  r.5.ame, '',  p.5.ame)

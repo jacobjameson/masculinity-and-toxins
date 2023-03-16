@@ -153,6 +153,7 @@ vars.keep <- c('w1.cigarettes', 'w1.marijuana', 'w1.recreational',
 final.df <- final.df[, vars.keep]
 final.df <- filter(final.df, is.na(gswgt4_2) == FALSE)
 
+nrow(final.df[is.na(final.df$w1.GE_male) == FALSE & final.df$w1_male == 1,])
 # Create a binary variable indicating whether a respondent is in the sample
 final.df <- final.df %>%
   mutate(in_sample = ifelse(w1_male == w4_male & w1_male == 1, 1, 0),
