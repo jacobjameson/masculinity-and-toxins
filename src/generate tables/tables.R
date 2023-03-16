@@ -126,7 +126,8 @@ ape_analysis <- function(frml, df, vcv){
   ####Robust variance-covariance matrix
   vcv_robust <- vcovHC(m0, type = vcv)
   ####Calculate APE
-  ape <- slopes(model = m0, vcov = vcv_robust, by = "above_school_avg")
+  #ape <- slopes(model = m0, vcov = vcv_robust, by = "above_school_avg")
+  ape <- slopes(model = m0, by = "above_school_avg")
   ####Definitive format
   ape %>% tidy() %>% as.data.frame() %>%
     mutate(outcome = str_squish(word(frml,1,sep = "\\~")) ) %>%
