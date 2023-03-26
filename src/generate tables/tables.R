@@ -336,6 +336,7 @@ m0 <- reg_analysis(
   df = subset(final.weighted, in_sample == 1), vcv = "HC0", F)  %>%
   mutate(model = 'model 0')
 
+
 m1 <- reg_analysis(
   frml = "delta_w1_w4_GE ~ race + pseudo.gpa +
                sespc_al + nhood1_d + katz_centrality_R", 
@@ -367,7 +368,7 @@ m5 <- reg_analysis(
   mutate(model = 'model 5')
 
 m6 <- reg_analysis(
-  frml = "delta_w1_w4_GE ~ race + pseudo.gpa +
+  frml = "delta_w1_w4_GE ~ race + pseudo.gpa + w1.GE_male_std_school +
                sespc_al + nhood1_d + katz_centrality_R + 
                num_bff_noms + nominations +
                mbff_reciprocity + fbff_reciprocity", 
