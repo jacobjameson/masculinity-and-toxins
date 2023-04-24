@@ -72,7 +72,7 @@ print(sum)
 # TABLE 2 --------------------------------------------------------------------------
 
 ### Create function for regression analysis
-reg_analysis <- function(frml, df, vcv, log=T){
+reg_analysis <- function(frml, df, vcv, log=T, pois=F){
   
   #### INPUTS
   ##   frml= string containing formula of lm model
@@ -174,6 +174,8 @@ s.5.ame <- ape_analysis(
   df = subset(final.weighted, in_sample == 1), vcv = "HC0") 
 
 s.results <- rbind(s.0, '', s.1, '', s.2, '',  s.3, '',  s.4, '',  s.5)
+
+
 
 # Marijuana
 m.0 <- reg_analysis(
@@ -385,5 +387,293 @@ results.ame <- rbind(s.5.ame, '', m.5.ame, '',
 
 write_csv(results, 'tables:figures/table2_regression_results.csv')
 write_csv(results.ame, 'tables:figures/table2_marginaleffects_results.csv')
+
+# ---------------------------------------------------
+
+# Sensitivity new vars---------------------------------
+
+
+### Create function for regression analysis
+reg_analysis <- function(frml, df, vcv){
+  frml1 <- as.formula(frml)
+    m0 <- svyglm(formula = frml1, design = df, family = 'quasibinomial')
+    vcv_robust <- vcovHC(m0, type = vcv)
+
+  robust <- coeftest(x = m0)
+  ci     <- confint(robust)
+  robust %>% broom::tidy() %>% as.data.frame() %>%
+    dplyr::mutate(outcome = str_squish(word(frml,1,sep = "\\~")),
+                  lwr = as.data.frame(ci)[,1],
+                  upr = as.data.frame(ci)[,2]) %>%
+    dplyr::select(outcome,term:p.value,lwr,upr) -> robust_df
+
+  return(robust_df)
+}
+
+s.1.b <- reg_analysis(
+  frml = "w4.cigarettes.bin.30 ~ w1.GE_male_std + race + pseudo.gpa + sespc_al + nhood1_d + w1.cigarettes", 
+  df = subset(final.weighted, in_sample == 1), vcv = "HC0")  %>%
+  mutate(model = 'sensitiviy model 1') 
+
+s.2.b <- reg_analysis(
+  frml = "w4.cigarettes.bin.30 ~ w4.GE_male_std + race + pseudo.gpa + sespc_al + nhood1_d + w1.cigarettes", 
+  df = subset(final.weighted, in_sample == 1), vcv = "HC0")  %>%
+  mutate(model = 'sensitiviy model 2')
+
+s.3.b <- reg_analysis(
+  frml = "w4.cigarettes.bin.30 ~ delta_w1_w4_GE + race + pseudo.gpa + sespc_al + nhood1_d + w1.cigarettes", 
+  df = subset(final.weighted, in_sample == 1), vcv = "HC0")  %>%
+  mutate(model = 'sensitiviy model 3')
+
+s.results.b <- rbind(s.1.b, '', s.2.b, '',  s.3.b)
+
+# drunk
+d.1.b <- reg_analysis(
+  frml = "w4.drunk.bin.30 ~ w1.GE_male_std + race + pseudo.gpa + sespc_al + nhood1_d + w1.drunk", 
+  df = subset(final.weighted, in_sample == 1), vcv = "HC0")  %>%
+  mutate(model = 'sensitiviy model 1') 
+
+d.2.b <- reg_analysis(
+  frml = "w4.drunk.bin.30 ~ w4.GE_male_std + race + pseudo.gpa + sespc_al + nhood1_d + w1.drunk", 
+  df = subset(final.weighted, in_sample == 1), vcv = "HC0")  %>%
+  mutate(model = 'sensitiviy model 2')
+
+d.3.b <- reg_analysis(
+  frml = "w4.drunk.bin.30 ~ delta_w1_w4_GE + race + pseudo.gpa + sespc_al + nhood1_d + w1.drunk", 
+  df = subset(final.weighted, in_sample == 1), vcv = "HC0")  %>%
+  mutate(model = 'sensitiviy model 3')
+
+
+d.4.b <- reg_analysis(
+  frml = "w4.drunk.bin.year ~ w1.GE_male_std + race + pseudo.gpa + sespc_al + nhood1_d + w1.drunk", 
+  df = subset(final.weighted, in_sample == 1), vcv = "HC0")  %>%
+  mutate(model = 'sensitiviy model 1') 
+
+d.5.b <- reg_analysis(
+  frml = "w4.drunk.bin.year ~ w4.GE_male_std + race + pseudo.gpa + sespc_al + nhood1_d + w1.drunk", 
+  df = subset(final.weighted, in_sample == 1), vcv = "HC0")  %>%
+  mutate(model = 'sensitiviy model 2')
+
+d.6.b <- reg_analysis(
+  frml = "w4.drunk.bin.year ~ delta_w1_w4_GE + race + pseudo.gpa + sespc_al + nhood1_d + w1.drunk", 
+  df = subset(final.weighted, in_sample == 1), vcv = "HC0")  %>%
+  mutate(model = 'sensitiviy model 3')
+
+d.results.b <- rbind(d.1.b, '', d.2.b, '',  d.3.b, '' ,
+                     d.4.b, '', d.5.b, '',  d.6.b)
+
+# marijuana
+m.1.b <- reg_analysis(
+  frml = "w4.marijuana.bin.30 ~ w1.GE_male_std + race + pseudo.gpa + sespc_al + nhood1_d + w1.marijuana", 
+  df = subset(final.weighted, in_sample == 1), vcv = "HC0")  %>%
+  mutate(model = 'sensitiviy model 1') 
+
+m.2.b <- reg_analysis(
+  frml = "w4.marijuana.bin.30 ~ w4.GE_male_std + race + pseudo.gpa + sespc_al + nhood1_d + w1.marijuana", 
+  df = subset(final.weighted, in_sample == 1), vcv = "HC0")  %>%
+  mutate(model = 'sensitiviy model 2')
+
+m.3.b <- reg_analysis(
+  frml = "w4.marijuana.bin.30 ~ delta_w1_w4_GE + race + pseudo.gpa + sespc_al + nhood1_d + w1.marijuana", 
+  df = subset(final.weighted, in_sample == 1), vcv = "HC0")  %>%
+  mutate(model = 'sensitiviy model 3')
+
+m.4.b <- reg_analysis(
+  frml = "w4.marijuana.bin.year ~ w1.GE_male_std + race + pseudo.gpa + sespc_al + nhood1_d + w1.marijuana", 
+  df = subset(final.weighted, in_sample == 1), vcv = "HC0")  %>%
+  mutate(model = 'sensitiviy model 1') 
+
+m.5.b <- reg_analysis(
+  frml = "w4.marijuana.bin.year ~ w4.GE_male_std + race + pseudo.gpa + sespc_al + nhood1_d + w1.marijuana", 
+  df = subset(final.weighted, in_sample == 1), vcv = "HC0")  %>%
+  mutate(model = 'sensitiviy model 2')
+
+m.6.b <- reg_analysis(
+  frml = "w4.marijuana.bin.year ~ delta_w1_w4_GE + race + pseudo.gpa + sespc_al + nhood1_d + w1.marijuana", 
+  df = subset(final.weighted, in_sample == 1), vcv = "HC0")  %>%
+  mutate(model = 'sensitiviy model 3')
+
+m.results.b <- rbind(m.1.b, '', m.2.b, '',  m.3.b, '' ,
+                     m.4.b, '', m.5.b, '',  m.6.b)
+
+
+# w4.fav.bin.30
+f.1.b <- reg_analysis(
+  frml = "w4.fav.bin.30 ~ w1.GE_male_std + race + pseudo.gpa + sespc_al + nhood1_d + w1.recreational", 
+  df = subset(final.weighted, in_sample == 1), vcv = "HC0")  %>%
+  mutate(model = 'sensitiviy model 1') 
+
+f.2.b <- reg_analysis(
+  frml = "w4.fav.bin.30 ~ w4.GE_male_std + race + pseudo.gpa + sespc_al + nhood1_d + w1.recreational", 
+  df = subset(final.weighted, in_sample == 1), vcv = "HC0")  %>%
+  mutate(model = 'sensitiviy model 2')
+
+f.3.b <- reg_analysis(
+  frml = "w4.fav.bin.30 ~ delta_w1_w4_GE + race + pseudo.gpa + sespc_al + nhood1_d + w1.recreational", 
+  df = subset(final.weighted, in_sample == 1), vcv = "HC0")  %>%
+  mutate(model = 'sensitiviy model 3')
+
+
+f.4.b <- reg_analysis(
+  frml = "w4.fav.bin.year ~ w1.GE_male_std + race + pseudo.gpa + sespc_al + nhood1_d + w1.recreational", 
+  df = subset(final.weighted, in_sample == 1), vcv = "HC0")  %>%
+  mutate(model = 'sensitiviy model 1') 
+
+f.5.b <- reg_analysis(
+  frml = "w4.fav.bin.year ~ w4.GE_male_std + race + pseudo.gpa + sespc_al + nhood1_d + w1.recreational", 
+  df = subset(final.weighted, in_sample == 1), vcv = "HC0")  %>%
+  mutate(model = 'sensitiviy model 2')
+
+f.6.b <- reg_analysis(
+  frml = "w4.fav.bin.year ~ delta_w1_w4_GE + race + pseudo.gpa + sespc_al + nhood1_d + w1.recreational", 
+  df = subset(final.weighted, in_sample == 1), vcv = "HC0")  %>%
+  mutate(model = 'sensitiviy model 3')
+
+f.results.b <- rbind(f.1.b, '', f.2.b, '',  f.3.b, '' ,
+                     f.4.b, '', f.5.b, '',  f.6.b)
+
+
+
+### Create function for nbreg regression analysis
+library(sjstats)
+
+nbreg_analysis <- function(frml, df){
+  frml1 <- as.formula(frml)
+  m0 <- svyglm.nb(formula = frml1, design = df)
+
+  robust <- coeftest(x = m0)
+  ci     <- confint(robust)
+  robust %>% broom::tidy() %>% as.data.frame() %>%
+    dplyr::mutate(outcome = str_squish(word(frml,1,sep = "\\~")),
+                  lwr = as.data.frame(ci)[,1],
+                  upr = as.data.frame(ci)[,2]) %>%
+    dplyr::select(outcome,term:p.value,lwr,upr) -> robust_df
+  
+  # Get IRR
+  #robust_df$estimate <- exp(robust_df$estimate)
+  #robust_df$std.error <- exp(robust_df$std.error)
+  #robust_df$lwr <- exp(robust_df$lwr)
+  #robust_df$upr <- exp(robust_df$upr)
+  
+  return(robust_df)
+}
+
+s.1.b <- nbreg_analysis(
+  frml = "w4.cigarettes.cont.30 ~ w1.GE_male_std + race + pseudo.gpa + sespc_al + nhood1_d + w1.cigarettes", 
+  df = subset(final.weighted, in_sample == 1))  %>%
+  mutate(model = 'sensitiviy model 1') 
+
+s.2.b <- nbreg_analysis(
+  frml = "w4.cigarettes.cont.30 ~ w4.GE_male_std + race + pseudo.gpa + sespc_al + nhood1_d + w1.cigarettes", 
+  df = subset(final.weighted, in_sample == 1))  %>%
+  mutate(model = 'sensitiviy model 2')
+
+s.3.b <- nbreg_analysis(
+  frml = "w4.cigarettes.cont.30 ~ delta_w1_w4_GE + race + pseudo.gpa + sespc_al + nhood1_d + w1.cigarettes", 
+  df = subset(final.weighted, in_sample == 1))  %>%
+  mutate(model = 'sensitiviy model 3')
+
+s.results.b <- rbind(s.1.b, '', s.2.b, '',  s.3.b)
+
+
+m.1.b <- nbreg_analysis(
+  frml = "w4.marijuana.cont.30 ~ w1.GE_male_std + race + pseudo.gpa + sespc_al + nhood1_d + w1.marijuana", 
+  df = subset(final.weighted, in_sample == 1))  %>%
+  mutate(model = 'sensitiviy model 1') 
+
+m.2.b <- nbreg_analysis(
+  frml = "w4.marijuana.cont.30 ~ w4.GE_male_std + race + pseudo.gpa + sespc_al + nhood1_d + w1.marijuana", 
+  df = subset(final.weighted, in_sample == 1))  %>%
+  mutate(model = 'sensitiviy model 2')
+
+m.3.b <- nbreg_analysis(
+  frml = "w4.marijuana.cont.30 ~ delta_w1_w4_GE + race + pseudo.gpa + sespc_al + nhood1_d + w1.marijuana", 
+  df = subset(final.weighted, in_sample == 1))  %>%
+  mutate(model = 'sensitiviy model 3')
+
+m.4.b <- nbreg_analysis(
+  frml = "w4.marijuana.cont.year ~ w1.GE_male_std + race + pseudo.gpa + sespc_al + nhood1_d + w1.marijuana", 
+  df = subset(final.weighted, in_sample == 1))  %>%
+  mutate(model = 'sensitiviy model 1') 
+
+m.5.b <- nbreg_analysis(
+  frml = "w4.marijuana.cont.year ~ w4.GE_male_std + race + pseudo.gpa + sespc_al + nhood1_d + w1.marijuana", 
+  df = subset(final.weighted, in_sample == 1))  %>%
+  mutate(model = 'sensitiviy model 2')
+
+m.6.b <- nbreg_analysis(
+  frml = "w4.marijuana.cont.year ~ delta_w1_w4_GE + race + pseudo.gpa + sespc_al + nhood1_d + w1.marijuana", 
+  df = subset(final.weighted, in_sample == 1))  %>%
+  mutate(model = 'sensitiviy model 3')
+
+s.results.b <- rbind(m.1.b, '', m.2.b, '',  m.3.b, '',
+                     m.4.b, '', m.5.b, '',  m.6.b)
+
+
+b.1.b <- nbreg_analysis(
+  frml = "w4.drunk.cont.30 ~ w1.GE_male_std + race + pseudo.gpa + sespc_al + nhood1_d + w1.drunk", 
+  df = subset(final.weighted, in_sample == 1))  %>%
+  mutate(model = 'sensitiviy model 1') 
+
+b.2.b <- nbreg_analysis(
+  frml = "w4.drunk.cont.30 ~ w4.GE_male_std + race + pseudo.gpa + sespc_al + nhood1_d + w1.drunk", 
+  df = subset(final.weighted, in_sample == 1))  %>%
+  mutate(model = 'sensitiviy model 2')
+
+b.3.b <- nbreg_analysis(
+  frml = "w4.drunk.cont.30 ~ delta_w1_w4_GE + race + pseudo.gpa + sespc_al + nhood1_d + w1.drunk", 
+  df = subset(final.weighted, in_sample == 1))  %>%
+  mutate(model = 'sensitiviy model 3')
+
+b.4.b <- nbreg_analysis(
+  frml = "w4.drunk.cont.year ~ w1.GE_male_std + race + pseudo.gpa + sespc_al + nhood1_d + w1.drunk", 
+  df = subset(final.weighted, in_sample == 1))  %>%
+  mutate(model = 'sensitiviy model 1') 
+
+b.5.b <- nbreg_analysis(
+  frml = "w4.drunk.cont.year ~ w4.GE_male_std + race + pseudo.gpa + sespc_al + nhood1_d + w1.drunk", 
+  df = subset(final.weighted, in_sample == 1))  %>%
+  mutate(model = 'sensitiviy model 2')
+
+b.6.b <- nbreg_analysis(
+  frml = "w4.drunk.cont.year ~ delta_w1_w4_GE + race + pseudo.gpa + sespc_al + nhood1_d + w1.drunk", 
+  df = subset(final.weighted, in_sample == 1))  %>%
+  mutate(model = 'sensitiviy model 3')
+
+b.results.b <- rbind(b.1.b, '', b.2.b, '',  b.3.b, '',
+                     b.4.b, '', b.5.b, '',  b.6.b)
+
+f.1.b <- nbreg_analysis(
+  frml = "w4.fav.cont.30 ~ w1.GE_male_std + race + pseudo.gpa + sespc_al + nhood1_d + w1.recreational", 
+  df = subset(final.weighted, in_sample == 1))  %>%
+  mutate(model = 'sensitiviy model 1') 
+
+f.2.b <- nbreg_analysis(
+  frml = "w4.fav.cont.30 ~ w4.GE_male_std + race + pseudo.gpa + sespc_al + nhood1_d + w1.recreational", 
+  df = subset(final.weighted, in_sample == 1))  %>%
+  mutate(model = 'sensitiviy model 2')
+
+f.3.b <- nbreg_analysis(
+  frml = "w4.fav.cont.30 ~ delta_w1_w4_GE + race + pseudo.gpa + sespc_al + nhood1_d + w1.recreational", 
+  df = subset(final.weighted, in_sample == 1))  %>%
+  mutate(model = 'sensitiviy model 3')
+
+f.4.b <- nbreg_analysis(
+  frml = "w4.fav.cont.year ~ w1.GE_male_std + race + pseudo.gpa + sespc_al + nhood1_d + w1.recreational", 
+  df = subset(final.weighted, in_sample == 1))  %>%
+  mutate(model = 'sensitiviy model 1') 
+
+f.5.b <- nbreg_analysis(
+  frml = "w4.fav.cont.year ~ w4.GE_male_std + race + pseudo.gpa + sespc_al + nhood1_d + w1.recreational", 
+  df = subset(final.weighted, in_sample == 1))  %>%
+  mutate(model = 'sensitiviy model 2')
+
+f.6.b <- nbreg_analysis(
+  frml = "w4.fav.cont.year ~ delta_w1_w4_GE + race + pseudo.gpa + sespc_al + nhood1_d + w1.recreational", 
+  df = subset(final.weighted, in_sample == 1))  %>%
+  mutate(model = 'sensitiviy model 3')
+
+f.results.b <- rbind(f.1.b, '', f.2.b, '',  f.3.b, '',
+                     f.4.b, '', f.5.b, '',  f.6.b)
 
 

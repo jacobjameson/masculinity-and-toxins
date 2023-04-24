@@ -135,8 +135,42 @@ final.df <- final.df %>%
                               TRUE ~ NA),
     w4.prescription = case_when(h4to63 == 1 ~ 1,
                                 h4to63 == 0 ~ 0,
-                                TRUE ~ NA)
-  )
+                                TRUE ~ NA),
+    w4.cigarettes.cont.30 = case_when(h4to5 < 96 ~ h4to5,
+                                      h4to5 == 97 ~ 0,
+                                      TRUE ~ NA),
+    w4.cigarettes.bin.30 = case_when(w4.cigarettes.cont.30 > 0 ~ 1,
+                                     w4.cigarettes.cont.30 == 0 ~ 0),
+    w4.drunk.cont.year = case_when(h4to38 == 97 ~ 0,
+                                 h4to38 >= 96 ~ NA,
+                                 TRUE ~ h4to38),
+    w4.drunk.bin.year = case_when(w4.drunk.cont.year == 0 ~ 0,
+                                   w4.drunk.cont.year >= 1 ~ 1),
+    w4.drunk.cont.30 = case_when(h4to39 == 97 ~ 0,
+                                   h4to39 >= 96 ~ NA,
+                                 TRUE ~ h4to39),
+    w4.drunk.bin.30 = case_when(w4.drunk.cont.30 == 0 ~ 0,
+                                w4.drunk.cont.30 >= 1 ~ 1),
+    w4.marijuana.cont.year = case_when(h4to70 == 97 ~ 0,
+                                   h4to70 >= 96 ~ NA,
+                                   TRUE ~ h4to70),
+    w4.marijuana.cont.30 = case_when(h4to71 == 97 ~ 0,
+                                 h4to71 >= 96 ~ NA,
+                                 TRUE ~ h4to71),
+    w4.marijuana.bin.year = case_when(w4.marijuana.cont.year == 0 ~ 0,
+                                      w4.marijuana.cont.year >= 1 ~ 1),
+    w4.marijuana.bin.30 = case_when(w4.marijuana.cont.30 == 0 ~ 0,
+                                    w4.marijuana.cont.30 >= 1 ~ 1),
+    w4.fav.cont.year = case_when(h4to98 == 97 ~ 0,
+                                       h4to98 >= 96 ~ NA,
+                                 TRUE ~ h4to98),
+    w4.fav.cont.30 = case_when(h4to99 == 97 ~ 0,
+                                     h4to99 >= 96 ~ NA,
+                               TRUE ~ h4to99),
+    w4.fav.bin.year = case_when(w4.fav.cont.year == 0 ~ 0,
+                                w4.fav.cont.year >= 1 ~ 1),
+    w4.fav.bin.30 = case_when(w4.fav.cont.30 == 0 ~ 0,
+                              w4.fav.cont.30 >= 1 ~ 1))
 
 # Define variables to keep -----------------------------------------------
 vars.keep <- c('w1.cigarettes', 'w1.marijuana', 'w1.recreational',
@@ -147,13 +181,20 @@ vars.keep <- c('w1.cigarettes', 'w1.marijuana', 'w1.recreational',
                'delta_w1_w4_GE', 'w1.GE_male', 'w4.GE_male',
                'school_avg_GE', 'w1.GE_male_std', 'w4.GE_male_std',
                'sespc_al', 'nhood1_d', 'pseudo.gpa', 'race', 'edu', 'insurance',
-               'w4_male', 'above_school_avg', 'w1.GE_male_std_school')
+               'w4_male', 'above_school_avg', 'w1.GE_male_std_school',
+               'w4.cigarettes.bin.30', 'w4.cigarettes.cont.30',
+               'w4.drunk.cont.year', 'w4.drunk.bin.30', 'w4.drunk.bin.year',
+               'w4.drunk.cont.30', 'w4.marijuana.cont.year', 
+               'w4.marijuana.cont.30', 'w4.fav.cont.year', 
+               'w4.fav.cont.30', 'w4.fav.bin.year', 'w4.fav.bin.30',
+               'w4.marijuana.bin.year', 'w4.marijuana.bin.30')
 
 # Select only the variables to keep and filter out any missing weight values
 final.df <- final.df[, vars.keep]
 final.df <- filter(final.df, is.na(gswgt4_2) == FALSE)
 
 nrow(final.df[is.na(final.df$w1.GE_male) == FALSE & final.df$w1_male == 1,])
+
 # Create a binary variable indicating whether a respondent is in the sample
 final.df <- final.df %>%
   mutate(in_sample = ifelse(w1_male == w4_male & w1_male == 1, 1, 0),
@@ -163,3 +204,4 @@ final.df <- final.df %>%
 #-------------------------------------------------------------------------
 network <- read_csv('data/network.csv')
 final.df <- merge(final.df, network, on='aid')
+
