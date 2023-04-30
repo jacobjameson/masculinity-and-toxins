@@ -275,7 +275,7 @@ ggsave("tables:figures/delta_margins.png", width = 14, height = 10, bg = 'white'
 
 
 
-# Figure 4 ---------------------------------------------------------------
+# IRR ---------------------------------------------------------------
 
 nbregs <-  read_csv('tables:figures/Negative Binomial IRRs 1,2,3.csv')
 

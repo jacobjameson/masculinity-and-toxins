@@ -143,3 +143,4 @@ nbreg.model <- do.call(rbind, mget(nbreg.model))[-1,]
 
 write_csv(nbreg.model, 'tables:figures/Negative Binomial IRRs 1,2,3.csv')
 
+view(logit.models)
