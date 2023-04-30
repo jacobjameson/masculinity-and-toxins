@@ -201,6 +201,10 @@ final.df <- final.df %>%
          in_sample = ifelse(is.na(w1.GE_male) == FALSE & is.na(w4.GE_male) == FALSE, 
                             in_sample, 0))
 
+#create cluster var
+final.df$cluster <- paste(final.df$region,final.df$psuscid)
+final.df$weights <- final.df$gswgt4_2 / mean(final.df$gswgt4_2)
+
 #-------------------------------------------------------------------------
 network <- read_csv('data/network.csv')
 final.df <- merge(final.df, network, on='aid')
