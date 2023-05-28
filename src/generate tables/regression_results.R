@@ -8,7 +8,7 @@ rm(list = ls())
 
 libs <- c("tidyverse", "haven", 'scales', 'survey', 'gridExtra',
           'gtsummary', 'labelled', 'broom', 'ggpubr', 'sandwich',
-          'lmtest', 'webshot2', 'kableExtra', 'sjstats')
+          'lmtest', 'webshot2', 'kableExtra', 'sjstats', 'MASS')
 
 installed_libs <- libs %in% rownames (installed.packages ())
 if (any (installed_libs == F)) {
@@ -25,17 +25,19 @@ source('src/prepare data/Construct Analytical Dataset.R')
 logit_analysis <- function(frml, df, j){
   
   frml1 <- as.formula(frml)
-  m0 <- glm(formula = frml1, data = df, weights = weights, family = "binomial")
+  m0 <- glm(formula = frml1, data = df, weights = weights, family = "quasibinomial")
   cluster <- df$cluster 
   robust <- coeftest(x = m0, vcov = vcovCL(m0, type = "HC0", cluster = ~ cluster))
   ci     <- confint(robust)
   
-  robust %>% broom::tidy() %>% as.data.frame() %>%
+  robust_df <- robust %>% 
+    tidy() %>%
+    as.data.frame() %>%
     mutate(outcome = str_squish(word(frml,1,sep = "\\~")),
            lwr = as.data.frame(ci)[,1],
-           upr = as.data.frame(ci)[,2]) %>%
-    select(outcome,term:p.value,lwr,upr) %>%
-    mutate(model = paste('Model ', j)) -> robust_df
+           upr = as.data.frame(ci)[,2],
+           model = paste('Model ', j)) 
+    #select(outcome,term:p.value,lwr,upr,model) 
   
   return(robust_df)
 }
@@ -76,6 +78,7 @@ for (i in seq_along(outcomes)) {
 }}
 )
 
+
 logit.models <- ls()[sapply(ls(), function(x) is.data.frame(get(x))) & grepl("^logit", ls())]
 logit.models <- do.call(rbind, mget(logit.models))[-1,]
 
@@ -97,7 +100,6 @@ nbreg_analysis <- function(frml, df, j){
     mutate(outcome = str_squish(word(frml,1,sep = "\\~")),
            lwr = as.data.frame(ci)[,1],
            upr = as.data.frame(ci)[,2]) %>%
-    select(outcome,term:p.value,lwr,upr) %>%
     filter(term %in% c("w1.GE_male_std", 
                        "w4.GE_male_std", 
                        "delta_w1_w4_GE")) %>%
@@ -139,8 +141,7 @@ for (i in seq_along(outcomes)) {
 })
 
 nbreg.model <- ls()[sapply(ls(), function(x) is.data.frame(get(x))) & grepl("^nbreg", ls())]
-nbreg.model <- do.call(rbind, mget(nbreg.model))[-1,]
+nbreg.model <- do.call(rbind, mget(nbreg.model))
 
 write_csv(nbreg.model, 'tables:figures/Negative Binomial IRRs 1,2,3.csv')
 
-view(logit.models)

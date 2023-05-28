@@ -34,9 +34,10 @@ t1.vars <- c("race", 'pseudo.gpa', 'sespc_al', 'nhood1_d', 'edu', 'insurance',
              "w1.recreational", "w4.fav.bin.year", "w4.fav.bin.30",
              "w4.prescription")
 
-sum <- final.df %>% filter(in_sample == 1) %>%
-  select(one_of(t1.vars), above_school_avg) %>%
-  tbl_summary(by = above_school_avg,
+sum <- final.df %>% 
+  filter(in_sample == 1) %>%
+  select(one_of(t1.vars), increasing) %>%
+  tbl_summary(by = increasing,
               type = all_continuous() ~ "continuous2",
               statistic = all_continuous() ~ c("{mean} ({sd})"),
               missing_text = "(Missing)") %>% 
@@ -54,12 +55,12 @@ final.weighted <- svydesign(id=~psuscid, strata=~region,
 
 sum <- subset(final.weighted, in_sample == 1) %>%
   tbl_svysummary(
-    by = above_school_avg, 
+    by = increasing, 
     type = all_continuous() ~ "continuous2",
     statistic = 
       all_continuous() ~ c("{mean} ({sd})"),
     missing = "always",
-    include = c(one_of(t1.vars), above_school_avg)) %>%
+    include = c(one_of(t1.vars), increasing)) %>%
   add_p(pvalue_fun = ~style_pvalue(.x, digits = 2),
         test = list(all_continuous() ~ "svy.kruskal.test",
                     all_categorical() ~ "svy.chisq.test")) %>%

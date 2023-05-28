@@ -57,6 +57,7 @@ final.df <- final.df %>%
       TRUE ~ NaN
     ),
     delta_w1_w4_GE = w4.GE_male_std - w1.GE_male_std,
+    increasing = ifelse(delta_w1_w4_GE > 0, 1, 0),
     school_self = case_when(
       above_school_avg == 1 & delta_w1_w4_GE > 0 ~ 1,
       above_school_avg == 1 & delta_w1_w4_GE < 0 ~ 2,
@@ -177,7 +178,7 @@ vars.keep <- c('w1.cigarettes', 'w1.marijuana', 'w1.recreational',
                'w1.drunk', 'w4.recreational', 'w4.marijuana',
                'w4.drunk', 'w4.cigarettes', 'w4.prescription',
                'aid', 'region', 'psuscid', 'gswgt4_2', 'sschlcde',
-               'w1_male', 'self_self', 'school_self',
+               'w1_male', 'self_self', 'school_self', 'increasing',
                'delta_w1_w4_GE', 'w1.GE_male', 'w4.GE_male',
                'school_avg_GE', 'w1.GE_male_std', 'w4.GE_male_std',
                'sespc_al', 'nhood1_d', 'pseudo.gpa', 'race', 'edu', 'insurance',
