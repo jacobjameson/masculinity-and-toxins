@@ -115,6 +115,7 @@ friend <- df_long %>%
 rm(list=setdiff(ls(), c('friend', 'bff', 'friend.df')))
 #-------------------------------------------------------------------------
 # Determine best friend reciprocity --------------------------------------
+
 rec <- data.frame()
 for (school in unique(friend.df$sschlcde)){
 
